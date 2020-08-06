@@ -82,7 +82,7 @@ check_fileServerType_param $fileServerType
    
   if [ "$webServerType" = "apache" ]; then
     # install apache pacakges
-    sudo apt-get -y install apache2 libapache2-mod-php
+    # sudo apt-get -y install apache2 libapache2-mod-php
   else
     # for nginx-only option
     sudo apt-get -y install php$phpVersion-fpm
@@ -353,7 +353,7 @@ EOF
 
    # php config 
    if [ "$webServerType" = "apache" ]; then
-     PhpIni=/etc/php/${PhpVer}/apache2/php.ini
+     # PhpIni=/etc/php/${PhpVer}/apache2/php.ini
    else
      PhpIni=/etc/php/${PhpVer}/fpm/php.ini
    fi
@@ -408,7 +408,7 @@ EOF
       if [ "$htmlLocalCopySwitch" != "true" ]; then
         setup_moodle_mount_dependency_for_systemd_service apache2 || exit 1
       fi
-      sudo service apache2 restart
+      #sudo service apache2 restart
    fi
 
    # Configure varnish startup for 16.04
