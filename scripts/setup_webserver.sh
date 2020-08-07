@@ -355,6 +355,7 @@ EOF
    # php config 
    if [ "$webServerType" = "apache" ]; then
      # PhpIni=/etc/php/${PhpVer}/apache2/php.ini
+     echo -e 'skip apache config'
    else
      PhpIni=/etc/php/${PhpVer}/fpm/php.ini
    fi
