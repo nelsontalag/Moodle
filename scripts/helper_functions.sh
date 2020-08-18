@@ -7,7 +7,7 @@ function get_setup_params_from_configs_json
     local configs_json_path=${1}    # E.g., /var/lib/cloud/instance/moodle_on_azure_configs.json
 
     sudo apt -y update; #(dpkg -l jq &> /dev/null) || (apt -y update; apt -y install jq)
-    sudo apt install -y jg
+    sudo apt install -y jq
     # Wait for the cloud-init write-files user data file to be generated (just in case)
     local wait_time_sec=0
     while [ ! -f "$configs_json_path" ]; do
@@ -60,11 +60,11 @@ function get_setup_params_from_configs_json
     export nfsHaLbIP=$(echo $json | jq -r .fileServerProfile.nfsHaLbIP)
     export nfsHaExportPath=$(echo $json | jq -r .fileServerProfile.nfsHaExportPath)
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
-    sudo apt install -y jg
+    sudo apt install -y jq
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
-    sudo apt install -y jg
+    sudo apt install -y jq
     export fileServerDiskSize=$(echo $json | jq -r .fileServerProfile.fileServerDiskSize)
-    sudo apt install -y jg
+    sudo apt install -y jq
     export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
 }
 
