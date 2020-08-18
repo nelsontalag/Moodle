@@ -62,7 +62,9 @@ function get_setup_params_from_configs_json
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
     sudo apt install -y jg
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
+    sudo apt install -y jg
     export fileServerDiskSize=$(echo $json | jq -r .fileServerProfile.fileServerDiskSize)
+    sudo apt install -y jg
     export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
 }
 
