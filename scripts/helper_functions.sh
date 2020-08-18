@@ -2,7 +2,7 @@
 
 # Common functions definitions
 
-function get_setup_params_from_configs_json
+get_setup_params_from_configs_json
 {
     local configs_json_path=${1}    # E.g., /var/lib/cloud/instance/moodle_on_azure_configs.json
 
@@ -65,7 +65,7 @@ function get_setup_params_from_configs_json
     export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
 }
 
-function get_php_version {
+get_php_version {
 # Returns current PHP version, in the form of x.x, eg 7.0 or 7.2
     if [ -z "$_PHPVER" ]; then
         _PHPVER=`/usr/bin/php -r "echo PHP_VERSION;" | /usr/bin/cut -c 1,2,3`
@@ -73,7 +73,7 @@ function get_php_version {
     echo $_PHPVER
 }
 
-function install_php_mssql_driver
+install_php_mssql_driver
 {
     # Download and build php/mssql driver
     /usr/bin/curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -97,7 +97,7 @@ function install_php_mssql_driver
     echo "extension=pdo_sqlsrv.so" >> /etc/php/$PHPVER/cli/php.ini
 }
 
-function check_fileServerType_param
+check_fileServerType_param
 {
     local fileServerType=$1
     if [ "$fileServerType" != "gluster" -a "$fileServerType" != "azurefiles" -a "$fileServerType" != "nfs" -a "$fileServerType" != "nfs-ha" -a "$fileServerType" != "nfs-byo" ]; then
@@ -106,7 +106,7 @@ function check_fileServerType_param
     fi
 }
 
-function create_azure_files_moodle_share
+create_azure_files_moodle_share
 {
     local storageAccountName=$1
     local storageAccountKey=$2
@@ -121,7 +121,7 @@ function create_azure_files_moodle_share
         --quota $fileServerDiskSize
 }
 
-function setup_and_mount_gluster_moodle_share
+setup_and_mount_gluster_moodle_share
 {
     local glusterNode=$1
     local glusterVolume=$2
@@ -130,7 +130,7 @@ function setup_and_mount_gluster_moodle_share
     mount /moodle
 }
 
-function setup_and_mount_azure_files_moodle_share
+setup_and_mount_azure_files_moodle_share
 {
     local storageAccountName=$1
     local storageAccountKey=$2
@@ -149,7 +149,7 @@ EOF
     mount /moodle
 }
 
-function setup_moodle_mount_dependency_for_systemd_service
+setup_moodle_mount_dependency_for_systemd_service
 {
   local serviceName=$1 # E.g., nginx, apache2
   if [ -z "$serviceName" ]; then
@@ -172,7 +172,7 @@ EOF
 
 # Functions for making NFS share available
 # TODO refactor these functions with the same ones in install_gluster.sh
-function scan_for_new_disks
+scan_for_new_disks
 {
     local BLACKLIST=${1}    # E.g., /dev/sda|/dev/sdb
     declare -a RET
@@ -189,7 +189,7 @@ function scan_for_new_disks
     echo "${RET}"
 }
 
-function create_raid0_ubuntu {
+create_raid0_ubuntu {
     local RAIDDISK=${1}       # E.g., /dev/md1
     local RAIDCHUNKSIZE=${2}  # E.g., 128
     local DISKCOUNT=${3}      # E.g., 4
@@ -211,7 +211,7 @@ function create_raid0_ubuntu {
     mdadm --detail --verbose --scan > /etc/mdadm/mdadm.conf
 }
 
-function do_partition {
+do_partition {
     # This function creates one (1) primary partition on the
     # disk device, using all available space
     local DISK=${1}   # E.g., /dev/sdc
@@ -231,7 +231,7 @@ function do_partition {
     fi
 }
 
-function add_local_filesystem_to_fstab {
+add_local_filesystem_to_fstab {
     local UUID=${1}
     local MOUNTPOINT=${2}   # E.g., /moodle
 
@@ -245,7 +245,7 @@ function add_local_filesystem_to_fstab {
     fi
 }
 
-function setup_raid_disk_and_filesystem {
+setup_raid_disk_and_filesystem {
     local MOUNTPOINT=${1}     # E.g., /moodle
     local RAIDDISK=${2}       # E.g., /dev/md1
     local RAIDPARTITION=${3}  # E.g., /dev/md1p1
@@ -289,7 +289,7 @@ function setup_raid_disk_and_filesystem {
     fi
 }
 
-function configure_nfs_server_and_export {
+configure_nfs_server_and_export {
     local MOUNTPOINT=${1}     # E.g., /moodle
 
     echo "Installing nfs server..."
@@ -305,7 +305,7 @@ function configure_nfs_server_and_export {
     fi
 }
 
-function configure_nfs_client_and_mount0 {
+configure_nfs_client_and_mount0 {
     local NFS_HOST_EXPORT_PATH=${1}   # E.g., controller-vm-ab12cd:/moodle or 172.16.3.100:/drbd/data
     local MOUNTPOINT=${2}             # E.g., /moodle
 
@@ -321,7 +321,7 @@ function configure_nfs_client_and_mount0 {
     mount ${MOUNTPOINT}
 }
 
-function configure_nfs_client_and_mount {
+configure_nfs_client_and_mount {
     local NFS_SERVER=${1}     # E.g., controller-vm-ab12cd or IP (NFS-HA LB)
     local NFS_DIR=${2}        # E.g., /moodle or /drbd/data
     local MOUNTPOINT=${3}     # E.g., /moodle
@@ -334,7 +334,7 @@ LOCAL_TIMESTAMP_FULLPATH="/var/www/html/moodle/.last_modified_time.moodle_on_azu
 
 # Create a script to sync /moodle/html/moodle (gluster/NFS) and /var/www/html/moodle (local) and set up a minutely cron job
 # Should be called by root and only on a VMSS web frontend VM
-function setup_html_local_copy_cron_job {
+setup_html_local_copy_cron_job {
   if [ "$(whoami)" != "root" ]; then
     echo "${0}: Must be run as root!"
     return 1
@@ -392,7 +392,7 @@ LAST_MODIFIED_TIME_UPDATE_SCRIPT_FULLPATH="/usr/local/bin/update_last_modified_t
 # Create a script to modify the last modified timestamp file (/moodle/html/moodle/last_modified_time.moodle_on_azure)
 # Should be called by root and only on the controller VM.
 # The moodle admin should run the generated script everytime the /moodle/html/moodle directory content is updated (e.g., moodle upgrade, config change or plugin install/upgrade)
-function create_last_modified_time_update_script {
+create_last_modified_time_update_script {
   if [ "$(whoami)" != "root" ]; then
     echo "${0}: Must be run as root!"
     return 1
@@ -407,7 +407,7 @@ EOF
   chmod +x $LAST_MODIFIED_TIME_UPDATE_SCRIPT_FULLPATH
 }
 
-function run_once_last_modified_time_update_script {
+run_once_last_modified_time_update_script {
   $LAST_MODIFIED_TIME_UPDATE_SCRIPT_FULLPATH
 }
 
@@ -416,7 +416,7 @@ function run_once_last_modified_time_update_script {
 # This function helps getting the stable version # (for O365 plugin ver.)
 # from a Moodle version tag. This utility function recognizes tag names
 # of the form 'vx.y.z' only.
-function get_o365plugin_version_from_moodle_version {
+get_o365plugin_version_from_moodle_version {
   local moodleVersion=${1}
   if [[ "$moodleVersion" =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
     echo "MOODLE_${BASH_REMATCH[1]}${BASH_REMATCH[2]}_STABLE"
@@ -428,7 +428,7 @@ function get_o365plugin_version_from_moodle_version {
 # For Moodle tags (e.g., "v3.4.2"), the unzipped Moodle dir is no longer
 # "moodle-$moodleVersion", because for tags, it's without "v". That is,
 # it's "moodle-3.4.2". Therefore, we need a separate helper function for that...
-function get_moodle_unzip_dir_from_moodle_version {
+get_moodle_unzip_dir_from_moodle_version {
   local moodleVersion=${1}
   if [[ "$moodleVersion" =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
     echo "moodle-${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
@@ -438,7 +438,7 @@ function get_moodle_unzip_dir_from_moodle_version {
 }
 
 # Long Redis cache Moodle config file generation code moved here
-function create_redis_configuration_in_moodledata_muc_config_php
+create_redis_configuration_in_moodledata_muc_config_php
 {
     # create redis configuration in /moodle/moodledata/muc/config.php
     cat <<EOF > /moodle/moodledata/muc/config.php
@@ -1382,7 +1382,7 @@ EOF
 }
 
 # Long fail2ban config command moved here
-function config_fail2ban
+config_fail2ban
 {
     cat <<EOF > /etc/fail2ban/jail.conf
 # Fail2Ban configuration file.
