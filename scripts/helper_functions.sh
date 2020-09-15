@@ -63,14 +63,14 @@ function get_setup_params_from_configs_json
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
     sudo rm /var/lib/dpkg/lock*
     sudo dpkg --configure -a
-    sudo apt update
+    #sudo apt update
     echo "nelson storageacct"
     sudo apt install -y jq
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
-    #sudo apt install -y jq
+    sudo apt install -y jq
     echo "nelson fileServerDiskSize"
     export fileServerDiskSize=$(echo $json | jq -r .fileServerProfile.fileServerDiskSize)
-    #sudo apt install -y jq
+    sudo apt install -y jq
     echo "nelson phpVersion"
     export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
 }
