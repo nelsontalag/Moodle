@@ -6,7 +6,8 @@ function get_setup_params_from_configs_json
 {
     local configs_json_path=${1}    # E.g., /var/lib/cloud/instance/moodle_on_azure_configs.json
 
-    sudo apt -y update; #(dpkg -l jq &> /dev/null) || (apt -y update; apt -y install jq)
+    sudo apt -y update; #
+    (dpkg -l jq &> /dev/null) || (apt -y update; apt -y install jq)
     sudo apt install -y jq
     # Wait for the cloud-init write-files user data file to be generated (just in case)
     local wait_time_sec=0
