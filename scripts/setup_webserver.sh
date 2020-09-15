@@ -62,7 +62,8 @@ check_fileServerType_param $fileServerType
   sudo apt-get install unzip
   sudo apt-get install rsyslog
   sudo apt-get -y install postgresql-client mysql-client git
-
+  sudo apt-get install -y jq
+  echo "nelson installed jq"
   if [ $fileServerType = "gluster" ]; then
     #configure gluster repository & install gluster client
     sudo add-apt-repository ppa:gluster/glusterfs-3.10 -y
