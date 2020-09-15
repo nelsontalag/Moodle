@@ -22,7 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 set -ex
-
+sudo apt-get install -y jq
+  echo "nelson installed jq"
+  
 moodle_on_azure_configs_json_path=${1}
 
 . ./helper_functions.sh
