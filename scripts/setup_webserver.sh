@@ -22,12 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 set -ex
-sudo apt-get install -y jq
-  echo "nelson installed jq"
   
 moodle_on_azure_configs_json_path=${1}
 
 . ./helper_functions.sh
+
+ sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+ sudo apt-get update > /dev/null 2>&1
+ sudo apt-get install -y jq
+ echo "nelson installed jq"
+
 
 get_setup_params_from_configs_json $moodle_on_azure_configs_json_path || exit 99
 
@@ -48,8 +52,6 @@ echo $phpVersion          >> /tmp/vars.txt
 
 # downloading and updating php packages from the repository 
 # sudo dpkg --configure –a
- sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
- sudo apt-get update > /dev/null 2>&1
 
 check_fileServerType_param $fileServerType
 
