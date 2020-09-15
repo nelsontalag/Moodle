@@ -1,7 +1,5 @@
 # Custom Script for Linux
-
 #!/bin/bash
-
 # The MIT License (MIT)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,15 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 set -ex
-  
 moodle_on_azure_configs_json_path=${1}
-
 . ./helper_functions.sh
-
- 
-
 get_setup_params_from_configs_json $moodle_on_azure_configs_json_path || exit 99
-
 echo $glusterNode    >> /tmp/vars.txt
 echo $glusterVolume  >> /tmp/vars.txt
 echo $siteFQDN >> /tmp/vars.txt
@@ -45,29 +37,21 @@ echo $nfsVmName >> /tmp/vars.txt
 echo $nfsByoIpExportPath >> /tmp/vars.txt
 echo $htmlLocalCopySwitch >> /tmp/vars.txt
 echo $phpVersion          >> /tmp/vars.txt
-
 # downloading and updating php packages from the repository 
 # sudo dpkg --configure –a
-
+ sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+ sudo apt-get update > /dev/null 2>&1
 check_fileServerType_param $fileServerType
-
 {
   # make sure the system does automatic update
   sudo apt-get -y update
   sudo apt-get -y install unattended-upgrades
-  sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
- sudo apt-get update > /dev/null 2>&1
- sudo apt-get install -y jq
- echo "nelson installed jq"
-
   # install pre-requisites
   #sudo apt-get -y install python-software-properties unzip rsyslog
   sudo apt-get install software-properties-common
   sudo apt-get install unzip
   sudo apt-get install rsyslog
   sudo apt-get -y install postgresql-client mysql-client git
-  sudo apt-get install -y jq
-  echo "nelson installed jq"
   if [ $fileServerType = "gluster" ]; then
     #configure gluster repository & install gluster client
     sudo add-apt-repository ppa:gluster/glusterfs-3.10 -y
@@ -103,7 +87,6 @@ check_fileServerType_param $fileServerType
    
   # PHP Version
   PhpVer=$(get_php_version)
-
   if [ $fileServerType = "gluster" ]; then
     # Mount gluster fs for /moodle
     sudo mkdir -p /moodle
@@ -126,7 +109,6 @@ check_fileServerType_param $fileServerType
   else # "azurefiles"
     setup_and_mount_azure_files_moodle_share $storageAccountName $storageAccountKey
   fi
-
   # Configure syslog to forward
   cat <<EOF >> /etc/rsyslog.conf
 \$ModLoad imudp
@@ -137,20 +119,16 @@ local1.*   @${syslogServer}:514
 local2.*   @${syslogServer}:514
 EOF
   service syslog restart
-
   if [ "$webServerType" = "nginx" -o "$httpsTermination" = "VMSS" ]; then
     # Build nginx config
     cat <<EOF > /etc/nginx/nginx.conf
 user www-data;
 worker_processes 2;
 pid /run/nginx.pid;
-
 events {
 	worker_connections 2048;
 }
-
 http {
-
   sendfile on;
   tcp_nopush on;
   tcp_nodelay on;
@@ -164,10 +142,8 @@ http {
   proxy_buffering off;
   include /etc/nginx/mime.types;
   default_type application/octet-stream;
-
   access_log /var/log/nginx/access.log;
   error_log /var/log/nginx/error.log;
-
   set_real_ip_from   127.0.0.1;
   real_ip_header      X-Forwarded-For;
   #upgrading to TLSv1.2 and droping 1 & 1.1
@@ -175,7 +151,6 @@ http {
   #ssl_prefer_server_ciphers on;
   #adding ssl ciphers
   ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
-
   gzip on;
   gzip_disable "msie6";
   gzip_vary on;
@@ -194,19 +169,15 @@ EOF
   }
 EOF
     fi
-
     cat <<EOF >> /etc/nginx/nginx.conf
   log_format moodle_combined '\$remote_addr - \$upstream_http_x_moodleuser [\$time_local] '
                              '"\$request" \$status \$body_bytes_sent '
                              '"\$http_referer" "\$http_user_agent"';
-
-
   include /etc/nginx/conf.d/*.conf;
   include /etc/nginx/sites-enabled/*;
 }
 EOF
   fi # if [ "$webServerType" = "nginx" -o "$httpsTermination" = "VMSS" ];
-
   # Set up html dir local copy if specified
   htmlRootDir="/moodle/html/moodle"
   if [ "$htmlLocalCopySwitch" = "true" ]; then
@@ -215,7 +186,6 @@ EOF
     htmlRootDir="/var/www/html/moodle"
     setup_html_local_copy_cron_job
   fi
-
   if [ "$httpsTermination" = "VMSS" ]; then
     # Configure nginx/https
     cat <<EOF >> /etc/nginx/sites-enabled/${siteFQDN}.conf
@@ -223,15 +193,12 @@ server {
         listen 443 ssl;
         root ${htmlRootDir};
 	index index.php index.html index.htm;
-
         ssl on;
         ssl_certificate /moodle/certs/nginx.crt;
         ssl_certificate_key /moodle/certs/nginx.key;
-
         # Log to syslog
         error_log syslog:server=localhost,facility=local1,severity=error,tag=moodle;
         access_log syslog:server=localhost,facility=local1,severity=notice,tag=moodle moodle_combined;
-
         # Log XFF IP instead of varnish
         set_real_ip_from    10.0.0.0/8;
         set_real_ip_from    127.0.0.1;
@@ -239,7 +206,6 @@ server {
         set_real_ip_from    192.168.0.0/16;
         real_ip_header      X-Forwarded-For;
         real_ip_recursive   on;
-
         location / {
           proxy_set_header Host \$host;
           proxy_set_header HTTP_REFERER \$http_referer;
@@ -248,7 +214,6 @@ server {
           proxy_set_header X-Forwarded-Proto https;
           proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
           proxy_pass http://localhost:80;
-
           proxy_connect_timeout       3600;
           proxy_send_timeout          3600;
           proxy_read_timeout          3600;
@@ -257,7 +222,6 @@ server {
 }
 EOF
   fi
-
   if [ "$webServerType" = "nginx" ]; then
     cat <<EOF >> /etc/nginx/sites-enabled/${siteFQDN}.conf
 server {
@@ -265,11 +229,9 @@ server {
         server_name ${siteFQDN};
         root ${htmlRootDir};
 	index index.php index.html index.htm;
-
         # Log to syslog
         error_log syslog:server=localhost,facility=local1,severity=error,tag=moodle;
         access_log syslog:server=localhost,facility=local1,severity=notice,tag=moodle moodle_combined;
-
         # Log XFF IP instead of varnish
         set_real_ip_from    10.0.0.0/8;
         set_real_ip_from    127.0.0.1;
@@ -292,7 +254,6 @@ EOF
         location ~ ^/server-status {
             return 404;
         }
-
 	location / {
 		try_files \$uri \$uri/index.php?\$query_string;
 	}
@@ -312,22 +273,17 @@ EOF
           include fastcgi_params;
         }
 }
-
 EOF
   fi # if [ "$webServerType" = "nginx" ];
-
   if [ "$webServerType" = "apache" ]; then
     # Configure Apache/php
     sed -i "s/Listen 80/Listen 81/" /etc/apache2/ports.conf
     a2enmod rewrite && a2enmod remoteip && a2enmod headers
-
     cat <<EOF >> /etc/apache2/sites-enabled/${siteFQDN}.conf
 <VirtualHost *:81>
 	ServerName ${siteFQDN}
-
 	ServerAdmin webmaster@localhost
 	DocumentRoot ${htmlRootDir}
-
 	<Directory ${htmlRootDir}>
 		Options FollowSymLinks
 		AllowOverride All
@@ -352,15 +308,12 @@ EOF
 	ErrorLog "|/usr/bin/logger -t moodle -p local1.error"
     CustomLog "|/usr/bin/logger -t moodle -p local1.notice" combined env=!forwarded
     CustomLog "|/usr/bin/logger -t moodle -p local1.notice" forwarded env=forwarded
-
 </VirtualHost>
 EOF
   fi # if [ "$webServerType" = "apache" ];
-
    # php config 
    if [ "$webServerType" = "apache" ]; then
      # PhpIni=/etc/php/${PhpVer}/apache2/php.ini
-     echo -e 'skip apache config'
    else
      PhpIni=/etc/php/${PhpVer}/fpm/php.ini
    fi
@@ -383,14 +336,12 @@ EOF
    if [ "$webServerType" = "apache" ]; then
      rm -f /etc/apache2/sites-enabled/000-default.conf
    fi
-
    if [ "$webServerType" = "nginx" -o "$httpsTermination" = "VMSS" ]; then
      # update startup script to wait for certificate in /moodle mount
      setup_moodle_mount_dependency_for_systemd_service nginx || exit 1
      # restart Nginx
      sudo service nginx restart 
    fi
-
    if [ "$webServerType" = "nginx" ]; then
      # fpm config - overload this 
      cat <<EOF > /etc/php/${PhpVer}/fpm/pool.d/www.conf
@@ -406,26 +357,21 @@ pm.start_servers = 20
 pm.min_spare_servers = 20 
 pm.max_spare_servers = 30 
 EOF
-
      # Restart fpm
      service php${PhpVer}-fpm restart
    fi
-
    if [ "$webServerType" = "apache" ]; then
       if [ "$htmlLocalCopySwitch" != "true" ]; then
         setup_moodle_mount_dependency_for_systemd_service apache2 || exit 1
       fi
       #sudo service apache2 restart
    fi
-
    # Configure varnish startup for 16.04
    VARNISHSTART="ExecStart=\/usr\/sbin\/varnishd -j unix,user=vcache -F -a :80 -T localhost:6082 -f \/etc\/varnish\/moodle.vcl -S \/etc\/varnish\/secret -s malloc,1024m -p thread_pool_min=200 -p thread_pool_max=4000 -p thread_pool_add_delay=2 -p timeout_linger=100 -p timeout_idle=30 -p send_timeout=1800 -p thread_pools=4 -p http_max_hdr=512 -p workspace_backend=512k"
    sed -i "s/^ExecStart.*/${VARNISHSTART}/" /lib/systemd/system/varnish.service
-
    # Configure varnish VCL for moodle
    cat <<EOF >> /etc/varnish/moodle.vcl
 vcl 4.0;
-
 import std;
 import directors;
 backend default {
@@ -435,13 +381,11 @@ backend default {
     .connect_timeout = 600s;
     .between_bytes_timeout = 600s;
 }
-
 sub vcl_recv {
     # Varnish does not support SPDY or HTTP/2.0 untill we upgrade to Varnish 5.0
     if (req.method == "PRI") {
         return (synth(405));
     }
-
     if (req.restarts == 0) {
       if (req.http.X-Forwarded-For) {
         set req.http.X-Forwarded-For = req.http.X-Forwarded-For + ", " + client.ip;
@@ -449,7 +393,6 @@ sub vcl_recv {
         set req.http.X-Forwarded-For = client.ip;
       }
     }
-
     # Non-RFC2616 or CONNECT HTTP requests methods filtered. Pipe requests directly to backend
     if (req.method != "GET" &&
         req.method != "HEAD" &&
@@ -460,25 +403,21 @@ sub vcl_recv {
         req.method != "DELETE") {
       return (pipe);
     }
-
     # Varnish don't mess with healthchecks
     if (req.url ~ "^/admin/tool/heartbeat" || req.url ~ "^/healthcheck.php")
     {
         return (pass);
     }
-
     # Pipe requests to backup.php straight to backend - prevents problem with progress bar long polling 503 problem
     # This is here because backup.php is POSTing to itself - Filter before !GET&&!HEAD
     if (req.url ~ "^/backup/backup.php")
     {
         return (pipe);
     }
-
     # Varnish only deals with GET and HEAD by default. If request method is not GET or HEAD, pass request to backend
     if (req.method != "GET" && req.method != "HEAD") {
       return (pass);
     }
-
     ### Rules for Moodle and Totara sites ###
     # Moodle doesn't require Cookie to serve following assets. Remove Cookie header from request, so it will be looked up.
     if ( req.url ~ "^/altlogin/.+/.+\.(png|jpg|jpeg|gif|css|js|webp)$" ||
@@ -497,7 +436,6 @@ sub vcl_recv {
         unset req.http.Cookie;
         return(hash);
     }
-
     # Perform lookup for selected assets that we know are static but Moodle still needs a Cookie
     if(  req.url ~ "^/theme/.+\.(png|jpg|jpeg|gif|css|js|webp)" ||
          req.url ~ "^/lib/.+\.(png|jpg|jpeg|gif|css|js|webp)" ||
@@ -508,7 +446,6 @@ sub vcl_recv {
          set req.http.X-Long-TTL = "86400";
          return (hash);
     }
-
     # Serve requests to SCORM checknet.txt from varnish. Have to remove get parameters. Response body always contains "1"
     if ( req.url ~ "^/lib/yui/build/moodle-core-checknet/assets/checknet.txt" )
     {
@@ -517,25 +454,21 @@ sub vcl_recv {
         set req.http.X-Long-TTL = "86400";
         return(hash);
     }
-
     # Requests containing "Cookie" or "Authorization" headers will not be cached
     if (req.http.Authorization || req.http.Cookie) {
         return (pass);
     }
-
     # Almost everything in Moodle correctly serves Cache-Control headers, if
     # needed, which varnish will honor, but there are some which don't. Rather
     # than explicitly finding them all and listing them here we just fail safe
     # and don't cache unknown urls that get this far.
     return (pass);
 }
-
 sub vcl_backend_response {
     # Happens after we have read the response headers from the backend.
     # 
     # Here you clean the response headers, removing silly Set-Cookie headers
     # and other mistakes your backend does.
-
     # We know these assest are static, let's set TTL >0 and allow client caching
     if ( beresp.http.Cache-Control && bereq.http.X-Long-TTL && beresp.ttl < std.duration(bereq.http.X-Long-TTL + "s", 1s) && !beresp.http.WWW-Authenticate )
     { # If max-age < defined in X-Long-TTL header
@@ -554,7 +487,6 @@ sub vcl_backend_response {
     else { # Don't touch headers if max-age > defined in X-Long-TTL header
         unset bereq.http.X-Long-TTL;
     }
-
     # Here we set X-Trace header, prepending it to X-Trace header received from backend. Useful for troubleshooting
     if(beresp.http.x-trace && !beresp.was_304) {
         set beresp.http.X-Trace = regsub(server.identity, "^([^.]+),?.*$", "\1")+"->"+regsub(beresp.backend.name, "^(.+)\((?:[0-9]{1,3}\.){3}([0-9]{1,3})\)","\1(\2)")+"->"+beresp.http.X-Trace;
@@ -562,48 +494,39 @@ sub vcl_backend_response {
     else {
         set beresp.http.X-Trace = regsub(server.identity, "^([^.]+),?.*$", "\1")+"->"+regsub(beresp.backend.name, "^(.+)\((?:[0-9]{1,3}\.){3}([0-9]{1,3})\)","\1(\2)");
     }
-
     # Gzip JS, CSS is done at the ngnix level doing it here dosen't respect the no buffer requsets
     # if (beresp.http.content-type ~ "application/javascript.*" || beresp.http.content-type ~ "text") {
     #    set beresp.do_gzip = true;
     #}
 }
-
 sub vcl_deliver {
-
     # Revert back to original Cache-Control header before delivery to client
     if (resp.http.X-Orig-Cache-Control)
     {
         set resp.http.Cache-Control = resp.http.X-Orig-Cache-Control;
         unset resp.http.X-Orig-Cache-Control;
     }
-
     # Revert back to original Pragma header before delivery to client
     if (resp.http.X-Orig-Pragma)
     {
         set resp.http.Pragma = resp.http.X-Orig-Pragma;
         unset resp.http.X-Orig-Pragma;
     }
-
     # (Optional) X-Cache HTTP header will be added to responce, indicating whether object was retrieved from backend, or served from cache
     if (obj.hits > 0) {
         set resp.http.X-Cache = "HIT";
     } else {
         set resp.http.X-Cache = "MISS";
     }
-
     # Set X-AuthOK header when totara/varnsih authentication succeeded
     if (req.http.X-AuthOK) {
         set resp.http.X-AuthOK = req.http.X-AuthOK;
     }
-
     # If desired "Via: 1.1 Varnish-v4" response header can be removed from response
     unset resp.http.Via;
     unset resp.http.Server;
-
     return(deliver);
 }
-
 sub vcl_backend_error {
     # More comprehensive varnish error page. Display time, instance hostname, host header, url for easier troubleshooting.
     set beresp.http.Content-Type = "text/html; charset=utf-8";
@@ -630,9 +553,7 @@ sub vcl_backend_error {
   "} );
    return (deliver);
 }
-
 sub vcl_synth {
-
     #Redirect using '301 - Permanent Redirect', permanent redirect
     if (resp.status == 851) { 
         set resp.http.Location = req.http.x-redir;
@@ -640,7 +561,6 @@ sub vcl_synth {
         set resp.status = 301;
         return (deliver);
     }
-
     #Redirect using '302 - Found', temporary redirect
     if (resp.status == 852) { 
         set resp.http.Location = req.http.x-redir;
@@ -648,7 +568,6 @@ sub vcl_synth {
         set resp.status = 302;
         return (deliver);
     }
-
     #Redirect using '307 - Temporary Redirect', !GET&&!HEAD requests, dont change method on redirected requests
     if (resp.status == 857) { 
         set resp.http.Location = req.http.x-redir;
@@ -656,7 +575,6 @@ sub vcl_synth {
         set resp.status = 307;
         return (deliver);
     }
-
     #Respond with 403 - Forbidden
     if (resp.status == 863) {
         set resp.http.X-Varnish-Error = true;
@@ -665,7 +583,6 @@ sub vcl_synth {
     }
 }
 EOF
-
 service=apache2
 if [ "$webServerType" = "nginx" ]; then
   if [ $(ps -ef | grep -v grep | grep $service | wc -l) > 0 ]; then
@@ -676,5 +593,4 @@ fi
   # Restart Varnish
   systemctl daemon-reload
   service varnish restart
-
 }  > /tmp/setup.log
