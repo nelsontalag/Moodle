@@ -61,11 +61,7 @@ function get_setup_params_from_configs_json
     export nfsHaLbIP=$(echo $json | jq -r .fileServerProfile.nfsHaLbIP)
     export nfsHaExportPath=$(echo $json | jq -r .fileServerProfile.nfsHaExportPath)
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
-    sudo rm /var/lib/dpkg/lock*
-    sudo dpkg --configure -a
-    #sudo apt update
-    echo "nelson storageacct"
-    apt -y update; apt -y install jq
+   
     sudo apt install -y jq
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
     sudo apt install -y jq
