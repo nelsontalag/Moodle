@@ -63,13 +63,17 @@ function get_setup_params_from_configs_json
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
    
     sudo apt install -y jq
-    export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
+    #export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
+    export storageAccountType="Standard_LRS"
     sudo apt install -y jq
     echo "nelson fileServerDiskSize"
-    export fileServerDiskSize=$(echo $json | jq -r .fileServerProfile.fileServerDiskSize)
+    #export fileServerDiskSize=$(echo $json | jq -r .fileServerProfile.fileServerDiskSize)
+    export fileServerDiskSize="127"
     sudo apt install -y jq
+    
     echo "nelson phpVersion"
-    export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
+    #export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
+    export phpVersion="7.4"
 }
 
 function get_php_version {
