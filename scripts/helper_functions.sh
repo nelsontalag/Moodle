@@ -65,6 +65,7 @@ function get_setup_params_from_configs_json
     sudo dpkg --configure -a
     #sudo apt update
     echo "nelson storageacct"
+    apt -y update; apt -y install jq
     sudo apt install -y jq
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
     sudo apt install -y jq
