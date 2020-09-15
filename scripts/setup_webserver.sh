@@ -27,11 +27,7 @@ moodle_on_azure_configs_json_path=${1}
 
 . ./helper_functions.sh
 
- sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
- sudo apt-get update > /dev/null 2>&1
- sudo apt-get install -y jq
- echo "nelson installed jq"
-
+ 
 
 get_setup_params_from_configs_json $moodle_on_azure_configs_json_path || exit 99
 
@@ -59,6 +55,10 @@ check_fileServerType_param $fileServerType
   # make sure the system does automatic update
   sudo apt-get -y update
   sudo apt-get -y install unattended-upgrades
+  sudo add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+ sudo apt-get update > /dev/null 2>&1
+ sudo apt-get install -y jq
+ echo "nelson installed jq"
 
   # install pre-requisites
   #sudo apt-get -y install python-software-properties unzip rsyslog
