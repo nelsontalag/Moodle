@@ -58,6 +58,7 @@ function get_setup_params_from_configs_json
     export webServerType=$(echo $json | jq -r .moodleProfile.webServerType)
     export htmlLocalCopySwitch=$(echo $json | jq -r .moodleProfile.htmlLocalCopySwitch)
     export nfsVmName=$(echo $json | jq -r .fileServerProfile.nfsVmName)
+    sudo apt install -y jq
     export nfsHaLbIP=$(echo $json | jq -r .fileServerProfile.nfsHaLbIP)
     export nfsHaExportPath=$(echo $json | jq -r .fileServerProfile.nfsHaExportPath)
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
