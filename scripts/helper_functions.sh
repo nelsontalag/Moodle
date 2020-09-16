@@ -20,7 +20,12 @@ function get_setup_params_from_configs_json
         fi
     done
 
-    local json=$(cat $configs_json_path)
+    local json1=$(cat $configs_json_path)
+    echo "--->Dinno1"
+    echo $json1
+    local json=$(sudo cat $configs_json_path)
+    echo "--->Dinno2"
+    echo $json
     sudo apt install -y jq
     export moodleVersion=$(echo $json | jq -r .moodleProfile.version)
     export glusterNode=$(echo $json | jq -r .fileServerProfile.glusterVmName)
