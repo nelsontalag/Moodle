@@ -21,6 +21,7 @@ function get_setup_params_from_configs_json
     done
 
     local json=$(cat $configs_json_path)
+    sudo apt install -y jq
     export moodleVersion=$(echo $json | jq -r .moodleProfile.version)
     export glusterNode=$(echo $json | jq -r .fileServerProfile.glusterVmName)
     export glusterVolume=$(echo $json | jq -r .fileServerProfile.glusterVolName)
