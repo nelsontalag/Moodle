@@ -26,7 +26,7 @@ function get_setup_params_from_configs_json
     local json=$(sudo cat $configs_json_path)
     echo "--->Dinno2"
     echo $json
-    sudo apt install -y jq
+    #sudo apt install -y jq
     export moodleVersion=$(echo $json | jq -r .moodleProfile.version)
     export glusterNode=$(echo $json | jq -r .fileServerProfile.glusterVmName)
     export glusterVolume=$(echo $json | jq -r .fileServerProfile.glusterVolName)
@@ -65,13 +65,15 @@ function get_setup_params_from_configs_json
     export webServerType=$(echo $json | jq -r .moodleProfile.webServerType)
     export htmlLocalCopySwitch=$(echo $json | jq -r .moodleProfile.htmlLocalCopySwitch)
     export nfsVmName=$(echo $json | jq -r .fileServerProfile.nfsVmName)
-    sudo apt install -y jq
-    #export nfsHaLbIP=$(echo $json | jq -r .fileServerProfile.nfsHaLbIP)
-    export nfsHaLbIP="172.31.2.100"
-    #export nfsHaExportPath=$(echo $json | jq -r .fileServerProfile.nfsHaExportPath)
-    export nfsHaExportPath="/drbd/data"
-    #export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
-    export nfsByoIpExportPath=""
+    echo "--->Dinno3"
+    echo $json
+    #sudo apt install -y jq
+    export nfsHaLbIP=$(echo $json | jq -r .fileServerProfile.nfsHaLbIP)
+    #export nfsHaLbIP="172.31.2.100"
+    export nfsHaExportPath=$(echo $json | jq -r .fileServerProfile.nfsHaExportPath)
+    #export nfsHaExportPath="/drbd/data"
+    export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
+    #export nfsByoIpExportPath=""
    
     #sudo apt install -y jq
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
@@ -85,6 +87,7 @@ function get_setup_params_from_configs_json
     #echo "nelson phpVersion"
     export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
     #export phpVersion="7.4"
+    echo "--->Dinno4"
 }
 
 function get_php_version {
